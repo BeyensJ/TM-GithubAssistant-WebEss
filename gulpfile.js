@@ -221,7 +221,6 @@ gulp.task('index-pages', (cb) => {
         .pipe(replace('moment({deadline})', `moment('${deadline})`))
         .pipe(replace('students = []', `students = ${JSON.stringify(students)};`))
         .pipe(replace('weekLabels[]', JSON.stringify(weekLabels)))
-        .pipe(replace('{{course}}', course))
         //.pipe(replace('logsArr = [];', `logsArr = ${JSON.stringify(logs)};`))
         .pipe(gulp.dest(`./repos`));
 });

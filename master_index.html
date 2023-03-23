@@ -117,7 +117,7 @@
 <body>
 <div class="container pt-2">
     <h1><i class="fa-brands fa-github"></i> TM Github Assistant</h1>
-    <h2 class="text-info my-3"><span class="tmBlue">Repositories {{course}}</span> <span class="tmOrange">{{reposTitle}}</span> </h2>
+    <h2 class="text-info my-3"><span class="tmBlue">Repositories Webdesign Essentials</span> <span class="tmOrange">{{reposTitle}}</span> </h2>
     <table class="table table-sm" id="reposTable">
         <thead>
         <tr>
@@ -141,7 +141,6 @@
 <script>
     const githubUrl = '{{githubUrl}}';
     const students = [];
-    const course = '{{course}}';
     let lastClickedUser = null;
     let showPullRequests = $('#btnInclPullRequests').prop('checked');
 
@@ -337,39 +336,6 @@
     }
 
     $(document).ready( function () {
-        let javaColumns =  [
-            { data: 'sequence'
-            },
-            { data: 'name',
-                render: function(data, type, row){
-                    return row.surname + " " + row.name;
-                },
-                className: 'reorder-item'
-            },
-            { data: 'repo',
-                render: function(data, type, row){
-                    return "<a href='" + row.repo + "' target='_blank'>" + row.username + "</a>";
-                }
-            },
-            { data: 'username',
-                render: function(data, type, row){
-
-                        return `
-                        <a title="View Logs" href="#!" class="getLogs fa-solid fa-clipboard-list text-muted" data-giturl="${row.repo}" data-id="${row.index}"></a>
-`
-                }},
-            { data: 'username',
-                render: function(data, type, row){
-                    return `
-                    <a title="Github repo" href="${row.repo}" class="fa-brands fa-github text-muted" target="github"></a>
-                        <a title="Github commits" href="${row.repo}/commits/main" class="fa-solid fa-code text-muted" target="github"></a>
-                        <a title="Github branches" href="${row.repo}/branches/all" class="fa-solid fa-code-branch text-muted" target="github"></a>
-                        <a title="Github issues" href="${row.repo}/issues" class="fa-solid fa-exclamation-circle text-muted" target="github"></a>
-                        <a title="Github contributions" href="${row.repo}/graphs/contributors" class="fa-regular fa-chart-bar text-muted" target="github"></a>
-                        <a title="Github settings" href="${row.repo}/settings/access" class="fa-solid fa-users-cog text-muted" target="github"></a>
-`
-                }}
-        ];
         let webColumns =  [
             { data: 'sequence'
             },
@@ -422,17 +388,8 @@
 `
                 }}
         ];
-        let columns = [];
-        switch (course){
-            case 'WEBESS':
                 columns = webColumns;
-                break;
-            case 'JAVA':
-                columns = javaColumns;
-                break;
-            default:
-                break;
-        }
+
 
         var table = $('#reposTable').DataTable({
             rowReorder: {
