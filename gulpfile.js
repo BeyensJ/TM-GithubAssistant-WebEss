@@ -11,7 +11,6 @@ const browserSync = require('browser-sync').create();
 
 const deadline = moment(process.env.DATE_DEADLINE || '2021-01-08 23:59:59', 'YYYY-MM-DD HH:mm:ss');
 const schoolStartDate = moment('2022-09-19 00:00:00');
-const course = process.env.COURSE;
 let prefix = process.env.GITHUB_PREFIX || 'https://github.com/xxx/';
 let items = require('./students.json');
 let students = [];
@@ -92,10 +91,7 @@ gulp.task('clone-repos', (cb) => {
                 let surnamesub = readme.substring(readmeLC.indexOf("surname"), readmeLC.indexOf("surname") + 150);
                 student.name = namesub ? namesub.split("|")[1]?.trim() : "";
                 student.surname = surnamesub ? surnamesub.split("|")[1]?.trim() : "";
-                let webspace = "";
-                let pexels = "";
                 console.log(student.surname + " " + student.name);
-                if(course == "WEBESS"){
                     let webspace = readme.substring(readmeLC.indexOf("webspace"), readmeLC.indexOf("webspace") + 150);
                     student.hosting = webspace ? webspace.split("|")[1]?.trim() : "";
                     let pexels = readme.substring(readmeLC.indexOf("pexels"), readmeLC.indexOf("pexels") + 150);
@@ -103,7 +99,6 @@ gulp.task('clone-repos', (cb) => {
 
                     console.log(student.hosting);
                     console.log(student.pexels);
-                }
 
                 if (counter === students.length) {
                     cb();
@@ -208,7 +203,6 @@ gulp.task('index-pages', (cb) => {
         student.sequence = i+1;
         let repo = student.repo;
         let githubUser = student.username;
-        if(course == "WEBESS"){
             let hosting = student.hosting;
             let photo = student.pexels;
             let localRepo = student.username;
@@ -218,7 +212,6 @@ gulp.task('index-pages', (cb) => {
                 .pipe(replace('{{student_name}}', name))
                 .pipe(replace('{{hosting}}', hosting))
                 .pipe(gulp.dest(`./repos/${localRepo}`));
-        }
     });
     // make index.html in 'repos'
     return gulp.src(`./master_index.html`)

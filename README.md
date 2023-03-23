@@ -7,7 +7,6 @@
 1. Installeer `npm install -g gulp-cli`
 2. Installeer de node modules `npm install`
 3. Update **.env** credentials
-4. - **COURSE**: string voor het vak te kiezen ("WEBESS", "JAVA")
    - **CLASS**: vrij te kiezen string (vergeet de quotes niet!)
    - **GITHUB_USER**: uw persoonlijke GitHub user name
    - **GITHUB_PASSWORD**: uw GitHub token
