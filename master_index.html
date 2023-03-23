@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowreorder/1.2.8/css/rowReorder.dataTables.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
+    <style>
+        #reposTable td:first-child, #reposTable td:nth-child(2) {
+            padding-right: 40px;
+            white-space: nowrap;
+            width: 20px;
+        }
+
+        #reposTable a:hover {
+            text-decoration: none;
+        }
+
+        #logsTbl thead th {
+            white-space: nowrap;
+        }
+
+        #logsTbl td:first-child {
+            width: 70px;
+        }
+
+        #logsTbl td:nth-child(2) {
+            white-space: nowrap;
+            width: 250px;
+        }
+
+        #logsTbl td:nth-child(3) {
+            white-space: nowrap;
+            width: 110px;
+        }
+
+        #logsTbl td:nth-child(4) {
+            text-align: center;
+        }
+
+        h3 small {
+            font-size: 1.2rem;
+        }
+
+        .white {
+            background-color: white;
+            color: #bebebe;
+        }
+
+        .success {
+            color: #28a745;
+        }
+
+        .warning {
+            color: #ffc107;
+        }
+
+        .danger {
+            color: #dc3545;
+        }
+
+        .primary {
+            color: #007bff;
+        }
+
+        .info {
+            color: #17a2b8;
+        }
+
+        .secondary {
+            color: #6c757d;
+        }
+
+        .highlightTable {
+            background-color: #f3f3f3;
+        }
+
+        .fa, .fa-solid, .fa-regular, .fa-brands {
+            font-size: 1.2em;
+        }
+
+        td:has(div.userCommits){
+            padding-top:0px !important;
+            padding-left:0px !important;
+            padding-right:0px !important;
+        }
+
+        div.userCommits{
+            background-color: #f2f2f2;
+            padding-left: 2vw;
+            padding-right: 2vw;
+            padding-top: 20px;
+            margin-bottom: 2rem;
+            overflow: auto;
+        }
+
+        .tmBlue{
+            color: #009cab;
+        }
+
+        .tmOrange{
+            color: #f04c25;
+        }
+
+        .top-grid{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .grid-graph{
+            grid-row: span 3;
+        }
+    </style>
+    <title>{{reposTitle}}</title>
+</head>
+<body>
+<div class="container pt-2">
+    <h1><i class="fa-brands fa-github"></i> TM Github Assistant</h1>
+    <h2 class="text-info my-3"><span class="tmBlue">Repositories {{course}}</span> <span class="tmOrange">{{reposTitle}}</span> </h2>
+    <table class="table table-sm" id="reposTable">
+        <thead>
+        <tr>
+            <th scope="col" id="seqCol">#</th>
+            <th scope="col" id="nameCol">Name</th>
+            <th scope="col" id="repoCol">Repo</th>
+            <th scope="col" id="hostingCol">Hosting</th>
+            <th scope="col" id="pexelsCol">Pexels</th>
+            <th scope="col" id="localCol">Local</th>
+            <th scope="col" id="githubCol">GitHub</th>
+        </tr>
+        </thead>
+    </table>
+    <p><span class="text-danger">{{lastUpdate}}</span></p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/rowreorder/1.2.8/js/dataTables.rowReorder.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const githubUrl = '{{githubUrl}}';
+    const students = [];
+    const course = '{{course}}';
+    let lastClickedUser = null;
+    let showPullRequests = $('#btnInclPullRequests').prop('checked');
+
+    switch(course){
+        case "JAVA":
+            $("#hostingCol").remove();
+            $("#pexelsCol").remove();
+    }
+
+    // table repos
+    $('#reposTable .fa-solid, #reposTable .fa-brands, #reposTable .fa-regular')
+        .addClass('fa-lg mr-2 text-muted')
+        .click(function () {
+            $('#reposTable tr').removeClass();
+            $(this).closest('tr').addClass('highlightTable');
+        });
+
+    // show local site + logs
+    $('.fa-chrome').click(function () {
+        $(this).siblings('.getLogs').click();
+    });
+
+    function format(d) {
+        // `d` is the original data object for the row
+        const tblColors = ['success', 'warning', 'danger', 'primary', 'info', 'secondary', 'success', 'warning'];
+        const tblNames = [];
+        const rows = d.commits;
+
+        let logsTbl = '';
+        let btnGroup = []
+
+        rows.forEach((crow, i) => {
+            const hash = crow.hash;
+            const name = crow.name;
+            const date = crow.date;
+            const commit = crow.commit;
+            let shortPush = "";
+            const beforeDeadline = crow.beforeDeadline;
+            let icon = "fa-code-commit";
+            // indien 'name' eerste maal voorkomt: voeg 'name' toe aan tblNames[] en maak button
+            if (!tblNames.includes(name)) {
+                tblNames.push(name);
+                const bntColor = tblColors[tblNames.indexOf(name)];
+
+                btnGroup.push(`<button type="button" class="btn btn-sm btn-${bntColor} mr-2 mb-2 showOnlyThisUser" data-user="${tblNames.indexOf(name)}" data-username="${d.username}">${name}</button>`);
+            }
+
+            // haal positie van 'name' in tblNames[] op en selecteer een kleur in tblColors[];
+            let classColor = tblColors[tblNames.indexOf(name)];
+
+            // indien 'commit' begint met "Merge ...":  class .white
+            if (commit.startsWith('Merge '))
+                icon = 'fa-code-merge';
+
+
+            if(crow.shortPush == true){
+                shortPush = "<i style='color:red;' class='fa-solid fa-circle-exclamation' title='Commit less than 5 min apart from previous'></i>"
+            }
+
+            logsTbl += `<tr data-user="${tblNames.indexOf(name)}" data-pullrequest="${(commit.startsWith('Merge '))}">
+                    <td ><i class="commiticon ${classColor} fa-solid ${icon}"></i></td>
+                    <td><a href="${d.repo}/commit/${hash}" target="github">${hash}</a></td>
+                    <td class="commitUser">${name}</td>
+                    <td>${date}</td>
+                     <td>${beforeDeadline}</td>
+                    <td class="commitInfo">${commit} ${shortPush}</td>
+                </tr>`;
+        });
+        return (
+            `<div class="userCommits container">
+            <h3 id="logsName">Logs ${d.name + " " + d.surname}</h3>
+    <div class="top-grid">
+            <div>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" checked class="custom-control-input btnInclPullRequests" data-username="${d.username}" id="btnInclPullRequests${d.username}">
+                    <label class="custom-control-label btnInclPullRequests" for="btnInclPullRequests${d.username}">Incl. pull request</label>
+                </div>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" checked class="custom-control-input btnShowAllUsers" data-username="${d.username}" id="btnShowAllUsers${d.username}">
+                    <label class="custom-control-label" for="btnShowAllUsers${d.username}">Show all users</label>
+                </div>
+            </div>
+            <div class="grid-graph">
+                <div id="chart-container" style="position: relative; width: 100%;">
+                  <canvas id="myChart${d.username}" style="width:100%; height: 20em;"></canvas>
+                </div>
+            </div>
+            <div class="">
+                <div class="btnGroup" id="btnGroup${d.username}">${btnGroup.join(" ")}</div>
+            </div>
+        <div>
+            <p class="col">Rows visible: <b><span id="visibleRows${d.username}"></span></b></p>
+        </div>
+    </div>
+    <table class="table table-sm mt-4" id="logsTbl${d.username}">
+        <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Date</th>
+            <th scope="col">Before dl</th>
+            <th scope="col">Commit</th>
+        </tr>
+        </thead>
+        <tbody>${logsTbl}</tbody>
+    </table>
+            </div>`
+        );
+    }
+
+
+    // render logs table
+    function renderLogs(username) {
+        // show/hide rows
+        $(`#logsTbl${username} tbody tr`).show();
+        if (lastClickedUser !== null) {
+            $(`#logsTbl${username} tbody tr:not([data-user=${lastClickedUser}])`).hide();
+        }
+        /*if (!showPullRequests) {
+            $(`#logsTbl${username} tbody tr[data-pullrequest=true]`).hide();
+        }*/
+
+        // count visible rows
+        const totalRows = $(`#logsTbl${username} tbody tr`).length;
+        const visibleRows = $(`#logsTbl${username} tbody tr:visible`).length;
+        $(`#visibleRows${username}`).text(`${visibleRows} of ${totalRows}`);
+
+        const datasets = [];
+
+        const fillColors = ["rgba(40, 167, 69, .7)", "rgba(255, 193, 7, .7)", "rgba(220, 53, 69, .7)", "rgba(0, 123, 255, .7)", "rgba(23, 162, 184, .7)", "rgba(108, 117, 125, .7)", "rgba(40, 167, 69, .7)", "rgba(255, 193, 7, .7)"];
+        const chartColors = ["rgba(40, 167, 69, 1)", "rgba(255, 193, 7, 1)", "rgba(220, 53, 69, 1)", "rgba(0, 123, 255, 1)", "rgba(23, 162, 184, 1)", "rgba(108, 117, 125, 1)", "rgba(40, 167, 69, 1)", "rgba(255, 193, 7, 1)"];
+
+        students.find(x => x.username === username).contributions.forEach((pcon, i) => {
+            datasets.push(
+                {
+                    label: pcon.name,
+                    backgroundColor: fillColors[i],
+                    borderColor: chartColors[i],
+                    data: pcon.contributions,
+                    parsing: {
+                        xAxisKey: 'week',
+                        yAxisKey: 'commits'
+                    },
+                }
+            );
+        })
+
+        const data = {
+            labels: students.find(x => x.username === username).contributions.map(x => x.week),
+            datasets: datasets
+        };
+
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                tension: 0.3,
+                fill: true,
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                },
+                elements: {
+                    line: {
+                        borderWidth: 2,
+                    },
+                    point:{
+                        radius: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        grace: '10%',
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Number of commits'
+                        },
+                        ticks: {
+                            precision: 0
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Week #'
+                        },
+                    }
+                }
+            }
+        };
+        const myChart = new Chart(
+            document.getElementById('myChart'+username),
+            config
+        );
+    }
+
+    $(document).ready( function () {
+        let javaColumns =  [
+            { data: 'sequence'
+            },
+            { data: 'name',
+                render: function(data, type, row){
+                    return row.surname + " " + row.name;
+                },
+                className: 'reorder-item'
+            },
+            { data: 'repo',
+                render: function(data, type, row){
+                    return "<a href='" + row.repo + "' target='_blank'>" + row.username + "</a>";
+                }
+            },
+            { data: 'username',
+                render: function(data, type, row){
+
+                        return `
+                        <a title="View Logs" href="#!" class="getLogs fa-solid fa-clipboard-list text-muted" data-giturl="${row.repo}" data-id="${row.index}"></a>
+`
+                }},
+            { data: 'username',
+                render: function(data, type, row){
+                    return `
+                    <a title="Github repo" href="${row.repo}" class="fa-brands fa-github text-muted" target="github"></a>
+                        <a title="Github commits" href="${row.repo}/commits/main" class="fa-solid fa-code text-muted" target="github"></a>
+                        <a title="Github branches" href="${row.repo}/branches/all" class="fa-solid fa-code-branch text-muted" target="github"></a>
+                        <a title="Github issues" href="${row.repo}/issues" class="fa-solid fa-exclamation-circle text-muted" target="github"></a>
+                        <a title="Github contributions" href="${row.repo}/graphs/contributors" class="fa-regular fa-chart-bar text-muted" target="github"></a>
+                        <a title="Github settings" href="${row.repo}/settings/access" class="fa-solid fa-users-cog text-muted" target="github"></a>
+`
+                }}
+        ];
+        let webColumns =  [
+            { data: 'sequence'
+            },
+            { data: 'name',
+                render: function(data, type, row){
+                    return row.surname + " " + row.name;
+                },
+                className: 'reorder-item'
+            },
+            { data: 'repo',
+                render: function(data, type, row){
+                    return "<a href='" + row.repo + "' target='_blank'>" + row.username + "</a>";
+                }
+            },
+            { data: 'hosting',
+                render: function(data, type, row){
+                    if(row.hosting && row.hosting.toLocaleLowerCase().indexOf("https") == 0) {
+                        return "<a href='" + row.hosting + "' target='_blank'>" + row.hosting + "</a>";
+                    }else{
+                        return "<i class='fa-solid fa-question text-muted' title='Missing' />";
+                    }
+                }},
+            { data: 'pexels',
+                render: function(data, type, row){
+                    if(row.pexels && row.pexels.toLocaleLowerCase().indexOf("https") == 0){
+                        return "<a href='" + row.pexels + "'  target='_blank'><span style='display:none;'>" + row.pexels+ "</span><i class='fa-solid fa-camera text-muted' title='Pexels Account'/></a>";
+                    }else{
+                        return "<i class='fa-solid fa-question text-muted' title='Missing'/>";
+                    }
+                }},
+            { data: 'username',
+                render: function(data, type, row){
+                        return `
+                        <a title="Local Repo" href="${row.username}/student_index.html" class="fa-brands fa-chrome text-muted" target="local"></a>
+                        <a title="View Logs" href="#!" class="getLogs fa-solid fa-clipboard-list text-muted" data-giturl="${row.repo}" data-id="${row.index}"></a>
+                        <a title="Portfolio" href="${row.username}/3_MyPortfolio/index.html" class="fa-solid fa-briefcase text-muted" target="local"></a>
+`
+
+
+                }},
+            { data: 'username',
+                render: function(data, type, row){
+                    return `
+                    <a title="Github repo" href="${row.repo}" class="fa-brands fa-github text-muted" target="github"></a>
+                        <a title="Github commits" href="${row.repo}/commits/main" class="fa-solid fa-code text-muted" target="github"></a>
+                        <a title="Github branches" href="${row.repo}/branches/all" class="fa-solid fa-code-branch text-muted" target="github"></a>
+                        <a title="Github issues" href="${row.repo}/issues" class="fa-solid fa-exclamation-circle text-muted" target="github"></a>
+                        <a title="Github contributions" href="${row.repo}/graphs/contributors" class="fa-regular fa-chart-bar text-muted" target="github"></a>
+                        <a title="Github settings" href="${row.repo}/settings/access" class="fa-solid fa-users-cog text-muted" target="github"></a>
+`
+                }}
+        ];
+        let columns = [];
+        switch (course){
+            case 'WEBESS':
+                columns = webColumns;
+                break;
+            case 'JAVA':
+                columns = javaColumns;
+                break;
+            default:
+                break;
+        }
+
+        var table = $('#reposTable').DataTable({
+            rowReorder: {
+                selector: '.reorder-item',
+                dataSrc: 'sequence'
+            },
+            data: students,
+            columns: columns,
+            columnDefs: [
+            {
+                target: 0,
+                visible: false,
+            }]
+        });
+
+        $('#reposTable tbody').on('click', 'td .getLogs', function () {
+            var tr = $(this).closest('tr');
+            var row = table.row(tr);
+
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            } else {
+                // Open this row
+                row.child(format(row.data())).show();
+                renderLogs(row.data().username);
+                $(`.btnInclPullRequests${row.data().username}`).click(function () {
+                    showPullRequests = $(this).prop('checked');
+                    let tableUser = $(this).data('username');
+                    renderLogs(tableUser);
+                })
+
+                // click switch #btnShowAllUsers
+                $(`.btnShowAllUsers`).click(function () {
+                    lastClickedUser = null;
+                    console.log($(this));
+                    let tableUser = $(this).data('username');
+                    $(this).prop('disabled', true);
+                    renderLogs(tableUser);
+                })
+
+                // click button .showOnlyThisUser
+                $(`.btnGroup`).on('click', '.showOnlyThisUser', function () {
+                    lastClickedUser = $(this).data('user');
+                    let tableUser = $(this).data('username');
+                    $(`#btnShowAllUsers${tableUser}`).removeAttr('disabled').prop('checked', false);
+                    renderLogs(tableUser);
+                })
+                tr.addClass('shown');
+            }
+        });
+
+    } );
+</script>
+</body>
+</html>

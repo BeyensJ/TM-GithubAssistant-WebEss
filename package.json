@@ -1,0 +1,31 @@
+{
+  "name": "Controle_webdesign_Essentials",
+  "version": "1.0.0",
+  "description": "Controle repo's webdesign essentials",
+  "main": "index.js",
+  "scripts": {
+    "test": "github-classroom-get --org --user --token --assignment [--save]"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pverhaert/Controle_Web_Essentials.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pverhaert/Controle_Web_Essentials/issues"
+  },
+  "homepage": "https://github.com/pverhaert/Controle_Web_Essentials#readme",
+  "author": "Patrick Verhaert",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "browser-sync": "^2.26.13",
+    "del": "^6.0.0",
+    "dotenv": "^8.2.0",
+    "gulp": "^4.0.2",
+    "gulp-color": "0.0.2",
+    "gulp-git": "^2.10.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-replace": "^1.0.0",
+    "moment": "^2.29.1"
+  }
+}
