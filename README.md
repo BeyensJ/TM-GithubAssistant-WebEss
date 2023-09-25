@@ -10,21 +10,16 @@
    - **CLASS**: vrij te kiezen string (vergeet de quotes niet!)
    - **GITHUB_USER**: uw persoonlijke GitHub user name
    - **GITHUB_PASSWORD**: uw GitHub token
+   - **DATE_START**: eerste schooldag "YYYY-MM-DD HH:mm:ss"
    - **DATE_DEADLINE**: deadline "YYYY-MM-DD HH:mm:ss"
    - **GITHUB_PREFIX** prefix van de classroom
-      - **1 ITF 01**: `https://github.com/itfactory-tm/2022_2023_1itf_01_webdesign_essentials-`
-      - **1 ITF 02**: `https://github.com/itfactory-tm/2022_2023_1itf_02_webdesign_essentials-`
-      - **1 ITF 03**: `https://github.com/itfactory-tm/2022_2023_1itf_03_webdesign_essentials-`
-      - **1 ITF 04**: `https://github.com/itfactory-tm/2022_2023_1itf_04_webdesign_essentials-`
-      - **1 ITF 05**: `https://github.com/itfactory-tm/2022_2023_1itf_05_webdesign_essentials-`
-      - **1 ACS 01**: `https://github.com/itfactory-tm/2022_2023_1acs_webdesign_essentials-`
-      - **1 ACS 02**: `https://github.com/itfactory-tm/2022_2023_1acs2_webdesign_essentials-`
-      - **1 WT**: `https://github.com/itfactory-tm/2022_2023_1WT_Webdesign_Essentials-`
     
 3. Voeg alle studenten van deze klas toe aan `students.json`
    - Lijst van github usernames
     
 4. Start de **Gulp task** and let the magic begin...
+
+*PS: Gebruik de templates van de **.env-template** en **students-template.json** files om van te vertrekken voor de juiste structuur van de **.env** en **students.json** files.*
 
 ## Gulp tasks
 
