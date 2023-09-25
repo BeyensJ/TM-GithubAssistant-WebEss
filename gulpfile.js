@@ -10,7 +10,7 @@ const moment = require('moment');
 const browserSync = require('browser-sync').create();
 
 const deadline = moment(process.env.DATE_DEADLINE || '2021-01-08 23:59:59', 'YYYY-MM-DD HH:mm:ss');
-const schoolStartDate = moment('2022-09-19 00:00:00');
+const schoolStartDate = moment(process.env.DATE_START || '2022-09-19 00:00:00', 'YYYY-MM-DD HH:mm:ss');
 let prefix = process.env.GITHUB_PREFIX || 'https://github.com/xxx/';
 let items = require('./students.json');
 let students = [];
