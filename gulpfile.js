@@ -85,7 +85,9 @@ gulp.task('clone-repos', (cb) => {
                 counter++
                 console.log(color(`Cloning ${counter}/${students.length}:  ${student.username} done`, 'YELLOW'));
                 //Read README file to get name, hosting and pexels
-                const readme = fs.readFileSync(`repos/${student.username}/README.md`,{encoding:'utf8', flag:'r'});
+                let readme = null;
+                try{
+                readme = fs.readFileSync(`repos/${student.username}/README.md`,{encoding:'utf8', flag:'r'});
                 const readmeLC = readme.toLowerCase();
                 let namesub = readme.substring(readmeLC.indexOf("name"), readmeLC.indexOf("name") + 150);
                 let surnamesub = readme.substring(readmeLC.indexOf("surname"), readmeLC.indexOf("surname") + 150);
@@ -99,7 +101,14 @@ gulp.task('clone-repos', (cb) => {
 
                     console.log(student.hosting);
                     console.log(student.pexels);
+                }catch(e){
+                    console.log("Students has no readme file available, setting default values");
+                    student.name = "NO README";
+                    student.surname = "NO README";
+                    student.hosting = "NO README";
+                    student.pexels = "NO README";
 
+                }
                 if (counter === students.length) {
                     cb();
                 }
