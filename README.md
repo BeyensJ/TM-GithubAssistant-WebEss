@@ -29,3 +29,8 @@ Clone repos, maak overzichtspagina, maak per repo een overzichtspagina met links
 Verwijder alle repos
 - `gulp`:  
 Start de webserver
+
+
+## Wanneer clonen vast loopt:
+
+- Probeer de max grootte van de git clone aan te passen met volgend commando: `git config --global http.postBuffer 524288000`
