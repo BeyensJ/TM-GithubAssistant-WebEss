@@ -130,7 +130,7 @@ gulp.task('git-commits', (cb) => {
         let contributions = [];
         git.exec({
             // https://git-scm.com/docs/pretty-formats
-            args: 'log --pretty=format:"%h --$-- %an --$-- %ai --$-- %s',
+            args: 'log --pretty=format:"%h ---- %an ---- %ai ---- %s"',
             cwd: `./repos/${student.username}`
         }, function (err, gitlog) {
             if (err) {
@@ -140,7 +140,7 @@ gulp.task('git-commits', (cb) => {
                 const rows = gitlog.split(/\n/);
                 // const row = [];
                 rows.reverse().forEach((r, i) => {
-                    const cel = r.split(' --$-- ');
+                    const cel = r.split(' ---- ');
                     let commitDate = moment(cel[2], 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
                     let isShortPush = false;
                     if(i != 0){
